@@ -7,3 +7,5 @@ Power/.classpath
 Power/.settings
 Power/bin/
 -multiline
+/bin/
+/.classpath
