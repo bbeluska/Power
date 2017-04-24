@@ -7,7 +7,7 @@ public class DataConstructor {
 	public static DataModel convert(String message){
 		//TODO: to be implemented
 		DataModel dummyData = new DataModel();
-		dummyData.setVoltage("230");
+		dummyData.setVoltage("220");
 		return dummyData;
 	}
 }
