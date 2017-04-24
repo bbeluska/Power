@@ -1,5 +1,4 @@
 package ui;
-import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import javax.swing.*;
@@ -10,35 +9,38 @@ public class View{
 	
 	public View(){
 		//Create and set up the window.
-		JFrame frame = new JFrame("Power");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setBounds(50, 50, screenWidth*2 / 3, screenHeight*2 / 3);
-		frame.getContentPane().setLayout(new GridLayout(1,2));
-		createLeftPanel();
-		createRightPanel();
-		JPanel leftPanel = new JPanel();
-		leftPanel.setLayout(new GridLayout(1,2));
-		//
-		JButton button1 = new JButton("B1");
-		JButton button2 = new JButton("B2");
-		JButton button3 = new JButton("B3");
-		JButton button4 = new JButton("B4");
-		leftPanel.add(button1);
-		leftPanel.add(button2);
-		leftPanel.add(button3);
-		leftPanel.add(button4);
+		JFrame mainFrame = new JFrame("Power");
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainFrame.setBounds(50, 50, screenWidth*2 / 3, screenHeight*2 / 3);
+		mainFrame.getContentPane().setLayout(new GridLayout(1,2));
 		
-		frame.getContentPane().add(leftPanel);
+		createLeftPanel(mainFrame);
+		
+		createRightPanel(mainFrame);
 		
 		//Display the window.
-		frame.setVisible(true);
+		mainFrame.setVisible(true);
 	}
 	
-	private void createLeftPanel(){
-		
+	private void createLeftPanel(JFrame parentFrame){
+		JPanel leftPanel = new JPanel();
+		leftPanel.setLayout(new GridLayout(1,2));
+		JButton button1 = new JButton("B1");
+		JButton button2 = new JButton("B2");
+		leftPanel.add(button1);
+		leftPanel.add(button2);
+		//
+		parentFrame.getContentPane().add(leftPanel);
 	}
 	
-	private void createRightPanel(){
-		
+	private void createRightPanel(JFrame parentFrame){
+		JPanel rightPanel = new JPanel();
+		rightPanel.setLayout(new GridLayout(1,2));
+		JButton button3 = new JButton("B3");
+		JButton button4 = new JButton("B4");
+		rightPanel.add(button3);
+		rightPanel.add(button4);
+		//
+		parentFrame.getContentPane().add(rightPanel);
 	}
 }
