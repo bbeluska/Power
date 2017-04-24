@@ -12,7 +12,8 @@ public class View{
 		JFrame mainFrame = new JFrame("Power");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setBounds(50, 50, screenWidth*2 / 3, screenHeight*2 / 3);
-		mainFrame.getContentPane().setLayout(new GridLayout(1,2));
+		GridLayout mainLayout = new GridLayout(1,2,1,1);
+		mainFrame.getContentPane().setLayout(mainLayout);
 		
 		createLeftPanel(mainFrame);
 		
