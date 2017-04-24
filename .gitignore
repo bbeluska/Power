@@ -1,0 +1,9 @@
+.metadata/
+.project/
+.classpath/
+.project
+.recommenders/
+Power/.classpath
+Power/.settings
+Power/bin/
+-multiline
