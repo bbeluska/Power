@@ -5,12 +5,10 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
 import javax.swing.*;
+
+import controller.Controller;
+import modell.DataModel;
 public class View{
 	private final GraphicsEnvironment graphicsEnviroment = GraphicsEnvironment.getLocalGraphicsEnvironment();
 	private final int screenWidth = graphicsEnviroment.getDefaultScreenDevice().getDisplayMode().getWidth();
@@ -24,6 +22,7 @@ public class View{
 	private Controller controller;
 	private JPanel rightPanel = new JPanel();
 	private JComboBox<String> comCombo;
+	private DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<String>();
 	private JLabel connectedLabel;
 	private JButton connectButton;
 	private JTextField voltageText;
@@ -110,9 +109,10 @@ public class View{
 		layout.putConstraint(SpringLayout.WEST, comPortLabel, 10, SpringLayout.WEST, parent);
 		layout.putConstraint(SpringLayout.NORTH, comPortLabel, 10, SpringLayout.NORTH, parent);
 		//Com Combo Box
-		this.comCombo= new JComboBox<String>(controller.getAvailableComPorts());
+		this.comCombo= new JComboBox<String>();
+		this.comCombo.setModel(this.comboBoxModel);
+		setComComboItems(controller.getAvailableComPorts());
 		this.comCombo.setPreferredSize(defaultTextFieldDimension);
-		this.comCombo.setSelectedIndex(-1);
 		parent.add(this.comCombo);
 		layout.putConstraint(SpringLayout.WEST, this.comCombo, 5, SpringLayout.EAST, comPortLabel);
 		layout.putConstraint(SpringLayout.SOUTH, this.comCombo, 4, SpringLayout.SOUTH, comPortLabel);
@@ -232,8 +232,7 @@ public class View{
 		
 	}
 	
-	//public
-	
+	/**-----------============PUBLIC==========-----------**/
 	
 	public void setConnectButtonConnect(boolean enabled){
 		if (enabled){
@@ -251,31 +250,26 @@ public class View{
 			this.connectButton.setEnabled(enabled);
 	}
 	
+	public void setComComboItems(String[] comList){
+		this.comboBoxModel.removeAllElements();
+		for (String item: controller.getAvailableComPorts()){
+			this.comboBoxModel.addElement(item);
+		}
+		this.comCombo.setSelectedIndex(-1);
+	}
+	
 	public void setComboEnabled(boolean enabled){
 		this.comCombo.setEnabled(enabled);
 	}
 	
-	public void setVoltage(String voltage){
-		this.voltageText.setText(voltage);
-	}
-	
-	public void setCurrent(String current){
-		this.currentText.setText(current);
-	}
-	
-	public void setPower(String power){
-		this.powerText.setText(power);
-	}
-	
-	public void setSetpoint(String setpoint){
-		this.setpointText.setText(setpoint);
-	}
-	
-	public void setError(String error){
-		this.errorText.setText(error);
-	}
-	
-	public void setTemperature(String temperature){
-		this.tempText.setText(temperature);
+	public void update(DataModel data){
+		this.voltageText.setText(data.getVoltage());
+		this.currentText.setText(data.getCurrent());
+		this.powerText.setText(data.getPower());
+		this.setpointText.setText(data.getSetpoint());
+		this.errorText.setText(data.getError());
+		this.tempText.setText(data.getTemperature());
+		
+		//TODO: update graphs
 	}
 }
