@@ -1,10 +1,12 @@
 package controller;
 
+import comunication.Comm;
 import modell.DataModel;
 import ui.View;
 
 public class Controller {
 	private View view;
+	private Comm comm;
 	private String selectedComPort;
 	private boolean connected = false;
 	private DataModel data;
@@ -12,6 +14,7 @@ public class Controller {
 	private static final long REFRESH_TIME = 500; //(mSec)
 	
 	public Controller(){
+		comm = new Comm();
 		view = new View(this);
 		new Updater().run();		
 	}
@@ -38,13 +41,8 @@ public class Controller {
 	public void disconnect(){
 		//disconnect from port
 		this.connected = false;
-		view.setComComboItems(findAvailableComPorts());
+		view.setComComboItems(getAvailableComPorts());
 		view.setConnectButtonConnect(true);
-	}
-	
-	private String[] findAvailableComPorts(){
-		//TODO: To be implemented
-		return new String[] {"COM1", "COM2", "COM3"};
 	}
 	
 	private class Updater implements Runnable {
@@ -67,7 +65,9 @@ public class Controller {
 	
 	//getters and setters
 	public String[] getAvailableComPorts(){
-		return this.findAvailableComPorts();
+		//TODO: To be implemented
+		//return (String[]) comm.getAvailablePorts().toArray();
+		return new String[] {"COM1", "COM2", "COM3"};
 	}
 
 	public String getSelectedComPort() {
