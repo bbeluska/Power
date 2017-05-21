@@ -8,11 +8,13 @@ public class Controller {
 	private View view;
 	private Comm comm;
 	private String selectedComPort;
-	private boolean connected = false;
 	private DataModel data;
 	
 	private static final long REFRESH_TIME = 500; //(mSec)
 	
+	/**
+	 * Constructor
+	 */
 	public Controller(){
 		comm = new Comm();
 		view = new View(this);
@@ -22,29 +24,30 @@ public class Controller {
 	/**
 	 * connect to the selected com port
 	 */
-	public void connect(){
-		view.setConnectButtonEnabled(false);
-		//try to connect
-//		if (connected){
-//			view.setConnectButtonConnect(false);
-//		} else {
-//			view.setConnectButtonConnect(true);
-//		}
-		view.setConnectButtonConnect(false);
-		this.connected = true;
-		view.setConnectButtonEnabled(true);
+	public void connect(String portName){
+		comm.connect(portName);
+		if (comm.isConnected()){
+			view.setReadyToConnect(false);
+		} else {
+			view.setReadyToConnect(true);
+		}
 	}
 	
 	/**
 	 * disconnect from com port
 	 */
 	public void disconnect(){
-		//disconnect from port
-		this.connected = false;
+		comm.disconnect();
 		view.setComComboItems(getAvailableComPorts());
-		view.setConnectButtonConnect(true);
+		view.setReadyToConnect(true);
 	}
 	
+	/**
+	 * Inner runnable Class for a separate thread for readings.
+	 * 
+	 * @author Mester-San
+	 *
+	 */
 	private class Updater implements Runnable {
 
 	       public void run() {
@@ -54,26 +57,36 @@ public class Controller {
 				} catch (InterruptedException e) {
 					System.out.println(e.getStackTrace().toString());
 				}
-	    		   if (isConnected()){
-	    			   data = DataConstructor.convert("dummyMessage");
-	    			   view.update(data);
+	    		   if (comm.isConnected()){
+	    			   String message = comm.readPort();
+	    			   if(null == message){
+	    				   disconnect();
+	    			   } else {
+	    				   //TODO: to be removed
+	    				   System.out.println(message);
+	    				   view.update(DataConstructor.convert(message));
+	    			   }
 	    		   }
 	    	   }
 	       }
-	    }
-
+	   }
 	
-	//getters and setters
+	/***************getters and setters******************/
+	
+	/**
+	 * Get the available ports from the {@link Comm Comm}.
+	 * 
+	 * @return list of strings with the available port names.
+	 */
 	public String[] getAvailableComPorts(){
-		//TODO: To be implemented
-		//return (String[]) comm.getAvailablePorts().toArray();
-		return new String[] {"COM1", "COM2", "COM3"};
+		return comm.searchForPorts();
 	}
 
-	public String getSelectedComPort() {
-		return selectedComPort;
-	}
-
+	/**
+	 * Validate and set the selected com port.
+	 * 
+	 * @param selectedComPort
+	 */
 	public void setSelectedComPort(String selectedComPort) {
 		if (null != selectedComPort && !"".equals(selectedComPort)){
 			this.selectedComPort = selectedComPort;
@@ -82,13 +95,4 @@ public class Controller {
 			view.setConnectButtonEnabled(false);
 		}
 	}
-	
-	public boolean isConnected() {
-		return connected;
-	}
-
-	public void setConnected(boolean connected) {
-		this.connected = connected;
-	}
-
 }

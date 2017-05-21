@@ -6,6 +6,10 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+
+import org.jfree.data.xy.XYDataset;
 
 import controller.Controller;
 import modell.DataModel;
@@ -29,10 +33,15 @@ public class View{
 	private JTextField currentText;
 	private JTextField powerText;
 	private JTextField setpointText;
-	private JLabel errorLabel;
+	private JTextField errorDeltaText;
 	private JTextField errorText;
+	private JLabel pwmLabel;
+	private JTextField pwmText;
 	private JTextField tempText;
-	
+	//
+	private XYDataset voltageDataset = DataSetFactory.createDataset(10);
+	//
+	private Graph voltageGraph;
 	//
 	private static final int LEFT_PANEL_WIDTH = 200;
 	private static final String COM_PORT = "Com Port:";
@@ -45,17 +54,17 @@ public class View{
 	private static final String POWER = "Power: ";
 	private static final String SETPOINT = "Setpoint: ";
 	private static final String ERROR = "Error: ";
+	private static final String PWM = "Pwm: ";
 	private static final String TEMPERATURE = "Temperature: ";
 	
 	public View(Controller controller){
 		this.controller = controller;
 		createView();
 		initListeners();
-		//getters and setters();
 	}
 	
 	/**
-	 * Create visual elements
+	 * Create Main view
 	 */
 	private void createView(){
 		JFrame mainFrame = new JFrame("Power");
@@ -73,6 +82,11 @@ public class View{
 		mainFrame.setVisible(true);
 	}
 	
+	/**
+	 * Create left panel.
+	 * 
+	 * @param parent widget
+	 */
 	private void createLeftPanel(JFrame parent){
 		JPanel leftPanel = new JPanel();
 		SpringLayout layout = new SpringLayout();
@@ -87,13 +101,18 @@ public class View{
 		parent.add(leftPanel);
 	}
 	
+	/**
+	 * Create Charts panel
+	 * 
+	 * @param parent widget
+	 */
 	private void createRightPanel(JFrame parent){
 		rightPanel.setLayout(new GridLayout(4,1));
-		JButton button1 = new JButton("B1");
+		this.voltageGraph = new Graph(this.voltageDataset, "Voltage", 0, 15);
 		JButton button2 = new JButton("B2");
 		JButton button3 = new JButton("B3");
 		JButton button4 = new JButton("B4");
-		rightPanel.add(button1);
+		rightPanel.add(this.voltageGraph);
 		rightPanel.add(button2);
 		rightPanel.add(button3);
 		rightPanel.add(button4);
@@ -101,6 +120,11 @@ public class View{
 		parent.add(rightPanel);
 	}
 	
+	/**
+	 * Create upper left part/
+	 * 
+	 * @param parent widget
+	 */
 	private void createUpperLeftPart(JPanel parent){
 		SpringLayout layout = (SpringLayout)parent.getLayout();
 		//Com Port Label
@@ -131,6 +155,11 @@ public class View{
 		layout.putConstraint(SpringLayout.NORTH, this.connectedLabel, 10, SpringLayout.SOUTH, this.connectButton);
 	}
 	
+	/**
+	 * Create middle left part.
+	 * 
+	 * @param parent widget
+	 */
 	private void createMiddleLeftPart(JPanel parent){
 		SpringLayout layout = (SpringLayout)parent.getLayout();
 		JLabel voltageLabel = new JLabel(VOLTAGE);
@@ -181,25 +210,54 @@ public class View{
 		layout.putConstraint(SpringLayout.WEST, setpointText, 0, SpringLayout.WEST, this.comCombo);
 		layout.putConstraint(SpringLayout.SOUTH, setpointText, 4, SpringLayout.SOUTH, setpointLabel);
 		//
-		this.errorLabel = new JLabel(ERROR);
-		parent.add(this.errorLabel);
-		layout.putConstraint(SpringLayout.WEST, this.errorLabel, 10, SpringLayout.WEST, parent);
-		layout.putConstraint(SpringLayout.NORTH, this.errorLabel, 20, SpringLayout.SOUTH, setpointLabel);
+		JLabel errorDeltaLabel = new JLabel(ERROR);
+		parent.add(errorDeltaLabel);
+		layout.putConstraint(SpringLayout.WEST, errorDeltaLabel, 10, SpringLayout.WEST, parent);
+		layout.putConstraint(SpringLayout.NORTH, errorDeltaLabel, 20, SpringLayout.SOUTH, setpointLabel);
+		//
+		this.errorDeltaText = new JTextField();
+		errorDeltaText.setEditable(false);
+		errorDeltaText.setPreferredSize(defaultTextFieldDimension);
+		parent.add(errorDeltaText);
+		layout.putConstraint(SpringLayout.WEST, errorDeltaText, 0, SpringLayout.WEST, this.comCombo);
+		layout.putConstraint(SpringLayout.SOUTH, errorDeltaText, 4, SpringLayout.SOUTH, errorDeltaLabel);
+		//
+		JLabel errorLabel = new JLabel(ERROR);
+		parent.add(errorLabel);
+		layout.putConstraint(SpringLayout.WEST, errorLabel, 10, SpringLayout.WEST, parent);
+		layout.putConstraint(SpringLayout.NORTH, errorLabel, 20, SpringLayout.SOUTH, errorDeltaLabel);
 		//
 		this.errorText = new JTextField();
 		errorText.setEditable(false);
 		errorText.setPreferredSize(defaultTextFieldDimension);
 		parent.add(errorText);
 		layout.putConstraint(SpringLayout.WEST, errorText, 0, SpringLayout.WEST, this.comCombo);
-		layout.putConstraint(SpringLayout.SOUTH, errorText, 4, SpringLayout.SOUTH, this.errorLabel);
+		layout.putConstraint(SpringLayout.SOUTH, errorText, 4, SpringLayout.SOUTH, errorLabel);
+		//
+		this.pwmLabel = new JLabel(PWM);
+		parent.add(pwmLabel);
+		layout.putConstraint(SpringLayout.WEST, pwmLabel, 10, SpringLayout.WEST, parent);
+		layout.putConstraint(SpringLayout.NORTH, pwmLabel, 20, SpringLayout.SOUTH, errorLabel);
+		//
+		this.pwmText = new JTextField();
+		pwmText.setEditable(false);
+		pwmText.setPreferredSize(defaultTextFieldDimension);
+		parent.add(pwmText);
+		layout.putConstraint(SpringLayout.WEST, pwmText, 0, SpringLayout.WEST, this.comCombo);
+		layout.putConstraint(SpringLayout.SOUTH, pwmText, 4, SpringLayout.SOUTH, pwmLabel);
 	}
 	
+	/**
+	 * Create lower left panel.
+	 * 
+	 * @param parent widget
+	 */
 	private void createLowerLeftPart(JPanel parent){
 		SpringLayout layout = (SpringLayout)parent.getLayout();
 		JLabel tempLabel = new JLabel(TEMPERATURE);
 		parent.add(tempLabel);
 		layout.putConstraint(SpringLayout.WEST, tempLabel, 10, SpringLayout.WEST, parent);
-		layout.putConstraint(SpringLayout.NORTH, tempLabel, 30, SpringLayout.SOUTH, this.errorLabel);
+		layout.putConstraint(SpringLayout.NORTH, tempLabel, 30, SpringLayout.SOUTH, this.pwmLabel);
 		//
 		this.tempText = new JTextField();
 		tempText.setEditable(false);
@@ -209,24 +267,39 @@ public class View{
 		layout.putConstraint(SpringLayout.NORTH, tempText, 4, SpringLayout.SOUTH, tempLabel);
 	}
 
+	/**
+	 * Add listeners.
+	 */
 	private void initListeners(){
+		//button press listener
 		this.connectButton.addActionListener(new ActionListener() {
-			
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (connectButton.getText().equals(CONNECT)){
-					controller.connect();
+					controller.connect((String) comCombo.getSelectedItem());
 				} else {
 					controller.disconnect();
 				}
 			}
 		});
-		
+		//com port changed listener
 		this.comCombo.addActionListener(new ActionListener() {
-			
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				controller.setSelectedComPort((String) comCombo.getSelectedItem());
+			}
+		});
+		
+		//listener for combo list drop down
+		this.comCombo.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				setComComboItems(controller.getAvailableComPorts());
+			}
+			
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				// Not implemented	
+			}
+			
+			public void popupMenuCanceled(PopupMenuEvent e) {
+				// Not implemented
 			}
 		});
 		
@@ -234,7 +307,13 @@ public class View{
 	
 	/**-----------============PUBLIC==========-----------**/
 	
-	public void setConnectButtonConnect(boolean enabled){
+	/**
+	 * Set status to ready to connect
+	 * 
+	 * @param enabled
+	 */
+	public void setReadyToConnect(boolean enabled){
+		this.comCombo.setEnabled(enabled);
 		if (enabled){
 			this.connectButton.setText(CONNECT);
 			this.connectedLabel.setText(DISCONNECTED);
@@ -246,30 +325,42 @@ public class View{
 		}
 	}
 	
+	/**
+	 * Setter for Connect button enabled state.
+	 * @param enabled
+	 */
 	public void setConnectButtonEnabled(boolean enabled){
 			this.connectButton.setEnabled(enabled);
 	}
 	
+	/**
+	 * Update Combo box items.
+	 * @param comList to be updated with.
+	 */
 	public void setComComboItems(String[] comList){
 		this.comboBoxModel.removeAllElements();
-		for (String item: controller.getAvailableComPorts()){
+		for (String item: comList){
 			this.comboBoxModel.addElement(item);
 		}
 		this.comCombo.setSelectedIndex(-1);
 	}
 	
-	public void setComboEnabled(boolean enabled){
-		this.comCombo.setEnabled(enabled);
-	}
-	
+	/**
+	 * Update readings. This should be called every time a new reading was made.
+	 * 
+	 * @param data to update with.
+	 */
 	public void update(DataModel data){
-		this.voltageText.setText(data.getVoltage());
-		this.currentText.setText(data.getCurrent());
-		this.powerText.setText(data.getPower());
-		this.setpointText.setText(data.getSetpoint());
-		this.errorText.setText(data.getError());
-		this.tempText.setText(data.getTemperature());
-		
+		if (null != data){
+			this.voltageText.setText(data.getVoltage() + " [V]");
+			this.currentText.setText(data.getCurrent() + " [A]");
+			this.powerText.setText(data.getPower() + " [W]");
+			this.setpointText.setText(data.getSetpoint() + " [W]");
+			this.errorDeltaText.setText(data.getErrorDelta() +" [W]");
+			this.errorText.setText(data.getError() + " [%]");
+			this.pwmText.setText(data.getPwm() + "[%]");
+			this.tempText.setText(data.getTemperature() + " [C]");
+		}
 		//TODO: update graphs
 	}
 }

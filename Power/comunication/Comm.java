@@ -1,33 +1,76 @@
 package comunication;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
 
-import javax.comm.*;
+import jssc.SerialPort;
+import jssc.SerialPortException;
+import jssc.SerialPortList;
 
-public class Comm {
-	private HashMap<String, CommPortIdentifier> portMap = new HashMap<String,CommPortIdentifier>();
+public class Comm{
 
-	@SuppressWarnings("rawtypes")
-	public List<String> getAvailablePorts(){
-		List<String> portList = new ArrayList<String>();
-		
-		Enumeration availablePorts = CommPortIdentifier.getPortIdentifiers();
-		while (availablePorts.hasMoreElements()){
-			CommPortIdentifier pid = (CommPortIdentifier) availablePorts.nextElement();
-			if(pid.getPortType() == CommPortIdentifier.PORT_SERIAL){
-				portList.add(pid.getName());
-				portMap.put(pid.getName(), pid);
-				//TODO:To remove
-				System.out.println(pid.getName());
-			}
+	SerialPort serialPort;
+	
+	/**
+	 * Search for available ports.
+	 * 
+	 * @return Array of String with available port names.
+	 */
+    public String[] searchForPorts()
+    {
+    	return SerialPortList.getPortNames();
+    }
+	
+    /**
+     * Connect to the given port.
+     * 
+     * @param portName the port to connect to
+     * @return true if connection successful.
+     */
+	public boolean connect(String portName){
+		serialPort = new SerialPort(portName);
+		try {
+			return serialPort.openPort();
+		} catch (SerialPortException e) {
+			e.printStackTrace();
+			return false;
 		}
-		return portList;
 	}
 	
-	public boolean connect(String portName){
-		
-		return false;
+	/**
+	 * Disconnect from the last connected port.
+	 */
+	public void disconnect(){
+		if (null != serialPort && serialPort.isOpened()){
+			try {
+				serialPort.closePort();
+			} catch (SerialPortException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Read from the opened serial port's buffer.
+	 * 
+	 * @return data from buffer
+	 */
+	public String readPort(){
+		if (null != serialPort && serialPort.isOpened()){
+			try {
+				return serialPort.readString();
+			} catch (SerialPortException e) {
+				e.printStackTrace();
+				return null;
+			}	
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Check if serial port is still opened.
+	 * 
+	 * @return true if open.
+	 */
+	public boolean isConnected(){
+		return null != serialPort && serialPort.isOpened();
 	}
 }

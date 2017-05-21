@@ -9,3 +9,4 @@ Power/bin/
 -multiline
 /bin/
 /.classpath
+/target/

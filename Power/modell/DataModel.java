@@ -5,8 +5,10 @@ public class DataModel {
 	private String current;
 	private String power;
 	private String setpoint;
+	private String errorDelta;
 	private String error;
 	private String temperature;
+	private String pwm;
 	
 	public String getVoltage() {
 		return voltage;
@@ -32,6 +34,12 @@ public class DataModel {
 	public void setSetpoint(String setpoint) {
 		this.setpoint = setpoint;
 	}
+	public String getErrorDelta() {
+		return errorDelta;
+	}
+	public void setErrorDelta(String error) {
+		this.errorDelta = error;
+	}
 	public String getError() {
 		return error;
 	}
@@ -43,6 +51,12 @@ public class DataModel {
 	}
 	public void setTemperature(String temperature) {
 		this.temperature = temperature;
+	}
+	public String getPwm() {
+		return pwm;
+	}
+	public void setPwm(String pwm) {
+		this.pwm = pwm;
 	}
 	
 }
